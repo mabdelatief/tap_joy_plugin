@@ -1,0 +1,38 @@
+group 'com.mahmoudabdellatief.tap_joy_plugin'
+version '1.0'
+
+buildscript {
+    repositories {
+        google()
+        jcenter()
+        maven {
+            name "Tapjoy's maven repo"
+            url "https://tapjoy.bintray.com/maven"
+        }
+    }
+
+    dependencies {
+        classpath 'com.android.tools.build:gradle:4.1.0'
+    }
+}
+
+rootProject.allprojects {
+    repositories {
+        google()
+        jcenter()
+    }
+}
+
+apply plugin: 'com.android.library'
+
+android {
+    compileSdkVersion 30
+
+    defaultConfig {
+        minSdkVersion 16
+    }
+    dependencies {
+        implementation 'com.tapjoy:tapjoy-android-sdk:12.7.1@aar'
+        implementation 'com.google.android.gms:play-services-ads-identifier:17.0.0'
+    }
+}
