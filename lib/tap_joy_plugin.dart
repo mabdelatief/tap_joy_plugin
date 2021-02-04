@@ -1,5 +1,6 @@
 
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
@@ -13,7 +14,17 @@ enum TapJoyContentState {
   contentDidDisappear,
   contentRequestSuccess,
   contentRequestFail,
-  userClicked,
+  userClickedAndroidOnly,
+}
+
+enum IOSATTAuthResult {
+  notDetermined,
+  restricted,
+  denied,
+  authorized,
+  none,
+  iOSVersionNotSupported,
+  android
 }
 
 enum TapJoyBalanceResult {
@@ -67,6 +78,34 @@ EarnedCurrencyAlertHandler _earnedCurrencyAlertHandler;
     return await _channel.invokeMethod("isConnected");
   }
 
+  Future<IOSATTAuthResult> getIOSATTAuth()async{
+    if (Platform.isIOS) {
+      final String result = await _channel.invokeMethod("getATT");
+      switch (result) {
+        case "NotDetermined":
+          return IOSATTAuthResult.notDetermined;
+          break;
+        case"Restricted":
+          return IOSATTAuthResult.restricted;
+          break;
+        case"Denied":
+          return IOSATTAuthResult.denied;
+          break;
+        case"Authorized":
+          return IOSATTAuthResult.authorized;
+          break;
+        case"NOT":
+          return IOSATTAuthResult.iOSVersionNotSupported;
+          break;
+        default:
+          return IOSATTAuthResult.none;
+          break;
+      }
+    } else {
+      return IOSATTAuthResult.android;
+    }
+  }
+
   // constructor method
   TapJoyPlugin() {
     _channel.setMethodCallHandler(_handleMethod);
@@ -81,11 +120,11 @@ EarnedCurrencyAlertHandler _earnedCurrencyAlertHandler;
     });
     return connectionResult;
   }
-  Future<bool> setUserID({@required String userID}) async {
-    final bool setUserIDResult = await _channel.invokeMethod('setUserID',<String, dynamic>{
+  Future<void> setUserID({@required String userID}) async {
+     await _channel.invokeMethod('setUserID',<String, dynamic>{
       'userID': userID,
     });
-    return setUserIDResult;
+    return;
   }
 
   Future<bool> _createPlacement(TJPlacement tjPlacement) async {
@@ -97,13 +136,7 @@ EarnedCurrencyAlertHandler _earnedCurrencyAlertHandler;
 
 
   Future<Null> _handleMethod(MethodCall call) async {
-    String placementName = call.arguments["placementName"];
-    int balance = call.arguments["balance"];
-    int earnedAmount = call.arguments["earnedAmount"];
-    String error = call.arguments["error"];
-    String currencyName = call.arguments["currencyName"];
-    TJPlacement tjPlacement = placements.firstWhere((element) => element.name == placementName,orElse: ()=> null);
-    switch(call.method) {
+   switch(call.method) {
       case 'connectionSuccess':
         if (this._connectionResultHandler != null) {
     this._connectionResultHandler(TapJoyConnectionResult.connected);
@@ -115,16 +148,22 @@ EarnedCurrencyAlertHandler _earnedCurrencyAlertHandler;
         }
         break;
       case 'requestSuccess':
-       if (tjPlacement != null) {
+        String placementName = call.arguments["placementName"];
+        TJPlacement tjPlacement = placements.firstWhere((element) => element.name == placementName,orElse: ()=> null);
+
+        if (tjPlacement != null) {
           if (tjPlacement._handler != null) {
 
-            tjPlacement._handler(TapJoyContentState.contentRequestSuccess,placementName,error);
+            tjPlacement._handler(TapJoyContentState.contentRequestSuccess,placementName,null);
           } else {
             //TODO : Handler Null Error
           }
         }
         break;
       case 'requestFail':
+        String placementName = call.arguments["placementName"];
+        TJPlacement tjPlacement = placements.firstWhere((element) => element.name == placementName,orElse: ()=> null);
+        String error = call.arguments["error"];
         if (tjPlacement != null) {
           if (tjPlacement._handler != null) {
             tjPlacement._handler(TapJoyContentState.contentRequestFail,placementName,error);
@@ -134,59 +173,83 @@ EarnedCurrencyAlertHandler _earnedCurrencyAlertHandler;
         }
         break;
       case 'contentReady':
+        String placementName = call.arguments["placementName"];
+        TJPlacement tjPlacement = placements.firstWhere((element) => element.name == placementName,orElse: ()=> null);
+
         if (tjPlacement != null) {
           if (tjPlacement._handler != null) {
-            tjPlacement._handler(TapJoyContentState.contentReady,placementName,error);
+            tjPlacement._handler(TapJoyContentState.contentReady,placementName,null);
           } else {
             //TODO : Handler Null Error
           }
         }
         break;
       case 'contentDidAppear':
+        String placementName = call.arguments["placementName"];
+        TJPlacement tjPlacement = placements.firstWhere((element) => element.name == placementName,orElse: ()=> null);
+
         if (tjPlacement != null) {
           if (tjPlacement._handler != null) {
-            tjPlacement._handler(TapJoyContentState.contentDidAppear,placementName,error);
+            tjPlacement._handler(TapJoyContentState.contentDidAppear,placementName,null);
           } else {
             //TODO : Handler Null Error
           }
         }
         break;
       case 'clicked':
+        String placementName = call.arguments["placementName"];
+        TJPlacement tjPlacement = placements.firstWhere((element) => element.name == placementName,orElse: ()=> null);
+
         if (tjPlacement != null) {
           if (tjPlacement._handler != null) {
-            tjPlacement._handler(TapJoyContentState.userClicked,placementName,error);
+            tjPlacement._handler(TapJoyContentState.userClickedAndroidOnly,placementName,null);
           } else {
             //TODO : Handler Null Error
           }
         }
         break;
       case 'contentDidDisAppear':
+        String placementName = call.arguments["placementName"];
+        TJPlacement tjPlacement = placements.firstWhere((element) => element.name == placementName,orElse: ()=> null);
+
         if (tjPlacement != null) {
           if (tjPlacement._handler != null) {
-            tjPlacement._handler(TapJoyContentState.contentDidDisappear,placementName,error);
+            tjPlacement._handler(TapJoyContentState.contentDidDisappear,placementName,null);
           } else {
             //TODO : Handler Null Error
           }
         }
         break;
       case 'onGetCurrencyBalanceResponse':
+        int balance = call.arguments["balance"];
+        String currencyName = call.arguments["currencyName"];
+        String error = call.arguments["error"];
         if (this._getCurrencyBalanceHandler != null) {
 
           this._getCurrencyBalanceHandler(currencyName,balance,error);
         }
         break;
       case 'onSpendCurrencyResponse':
+        int balance = call.arguments["balance"];
+        String currencyName = call.arguments["currencyName"];
+        String error = call.arguments["error"];
         if (this._spendCurrencyHandler != null) {
 
          this._spendCurrencyHandler(currencyName,balance,error);
         }
         break;
       case 'onAwardCurrencyResponse':
+        int balance = call.arguments["balance"];
+        String currencyName = call.arguments["currencyName"];
+        String error = call.arguments["error"];
         if (this._awardCurrencyHandler != null) {
           this._awardCurrencyHandler(currencyName,balance,error);
         }
         break;
       case 'onEarnedCurrency':
+        int earnedAmount = call.arguments["earnedAmount"];
+        String currencyName = call.arguments["currencyName"];
+        String error = call.arguments["error"];
         if (this._earnedCurrencyAlertHandler != null) {
           this._earnedCurrencyAlertHandler(currencyName,earnedAmount,error);
         }
