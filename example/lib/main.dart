@@ -11,8 +11,9 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  TJPlacement myPlacement;
-  TJPlacement myPlacement2;
+  TJPlacement myPlacement = TJPlacement(name: "LevelComplete");
+
+  TJPlacement myPlacement2 = TJPlacement(name: "Placement02");
   String contentStateText = "";
   String connectionState  = "";
   String iOSATTAuthResult  = "";
@@ -54,7 +55,7 @@ class _MyAppState extends State<MyApp> {
             contentStateText = "Content Request Fail + $error for placement :  $name";
           });
           break;
-        case TapJoyContentState.userClicked:
+        case TapJoyContentState.userClickedAndroidOnly:
         // TODO: Handle this case.
           setState(() {
             contentStateText = "Content User Clicked for placement :  $name";
@@ -62,9 +63,8 @@ class _MyAppState extends State<MyApp> {
           break;
       }
     };
-    myPlacement = TJPlacement(name: "LevelComplete");
+
     myPlacement.setHandler(handler);
-    myPlacement2 = TJPlacement(name: "Placement02");
     myPlacement2.setHandler(handler);
 
     TapJoyPlugin.shared.addPlacement(myPlacement);
@@ -82,6 +82,8 @@ class _MyAppState extends State<MyApp> {
       setState(() {
         balance = "Currency Name: " + currencyName.toString() + " Amount:  " + amount.toString() + " Error:" + error.toString();
       }); });
+
+    TapJoyPlugin.shared.setUserID(userID: "user_id");
     TapJoyPlugin.shared.setConnectionResultHandler((result) {
       switch (result) {
 
@@ -145,6 +147,7 @@ class _MyAppState extends State<MyApp> {
           });
       }
     });
+
   }
 
   @override
