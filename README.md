@@ -1,6 +1,7 @@
 # tap_joy_plugin
 
 Flutter Plugin for [TapJoy](https://www.tapjoy.com/) SDK - Supports Android & iOS
+This Plugin Does NOT Support TapJoy purchases or Push Notifications.
 
 ## info.plist changes
 [TapJoy](https://www.tapjoy.com/) is enrolled as a network partner in Apple’s SKAdNetwork. Add Tapjoy's network ID to your app’s ```info.plist``` file along with the IDs of the DSP partners listed below:
@@ -214,7 +215,7 @@ amount, error) {   });
 ### Spend Currency 
 
 ```dart
-  TapJoyPlugin.shared.spendCurrency(int amount);
+  TapJoyPlugin.shared.spendCurrency( int amount );
 ```
 
 
@@ -222,4 +223,4 @@ amount, error) {   });
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
 
 ## License
-[BSD](https://choosealicense.com/licenses/mit/)
+[MIT](https://github.com/mabdelatief/tap_joy_plugin/blob/master/LICENSE)
