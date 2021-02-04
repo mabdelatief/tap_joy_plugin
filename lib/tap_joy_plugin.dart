@@ -20,7 +20,7 @@ enum TapJoyBalanceResult {
   balanceRequestSuccess,
   balanceRequestFail
 }
-typedef void TJPlacementHandler(TapJoyContentState contentState);
+typedef void TJPlacementHandler(TapJoyContentState contentState,String placementName,String error,);
 typedef void ConnectionResultHandler(TapJoyConnectionResult connectionResult);
 // typedef void ContentStateHandler(TapJoyContentState contentState);
 typedef void SpendCurrencyHandler(String currencyName,int amount,String error);
@@ -46,6 +46,26 @@ SpendCurrencyHandler _spendCurrencyHandler;
 AwardCurrencyHandler _awardCurrencyHandler;
 GetCurrencyBalanceHandler _getCurrencyBalanceHandler;
 EarnedCurrencyAlertHandler _earnedCurrencyAlertHandler;
+
+  void setConnectionResultHandler(ConnectionResultHandler handler) {
+    _connectionResultHandler = handler;
+  }
+  void setSpendCurrencyHandler(SpendCurrencyHandler handler) {
+    _spendCurrencyHandler = handler;
+  }
+  void setAwardCurrencyHandler(AwardCurrencyHandler handler) {
+    _awardCurrencyHandler = handler;
+  }
+  void setGetCurrencyBalanceHandler(GetCurrencyBalanceHandler handler) {
+    _getCurrencyBalanceHandler = handler;
+  }
+  void setEarnedCurrencyAlertHandler(EarnedCurrencyAlertHandler handler) {
+    _earnedCurrencyAlertHandler = handler;
+  }
+
+  Future<bool> isConnected() async{
+    return await _channel.invokeMethod("isConnected");
+  }
 
   // constructor method
   TapJoyPlugin() {
@@ -75,8 +95,15 @@ EarnedCurrencyAlertHandler _earnedCurrencyAlertHandler;
       return result;
   }
 
+
   Future<Null> _handleMethod(MethodCall call) async {
-   switch(call.method) {
+    String placementName = call.arguments["placementName"];
+    int balance = call.arguments["balance"];
+    int earnedAmount = call.arguments["earnedAmount"];
+    String error = call.arguments["error"];
+    String currencyName = call.arguments["currencyName"];
+    TJPlacement tjPlacement = placements.firstWhere((element) => element.name == placementName,orElse: ()=> null);
+    switch(call.method) {
       case 'connectionSuccess':
         if (this._connectionResultHandler != null) {
     this._connectionResultHandler(TapJoyConnectionResult.connected);
@@ -88,74 +115,55 @@ EarnedCurrencyAlertHandler _earnedCurrencyAlertHandler;
         }
         break;
       case 'requestSuccess':
-        String placementName = call.arguments["placementName"];
-        TJPlacement tjPlacement = placements.firstWhere((element) => element.name == placementName,orElse: ()=> null);
-
-        if (tjPlacement != null) {
+       if (tjPlacement != null) {
           if (tjPlacement._handler != null) {
 
-            tjPlacement._handler(TapJoyContentState.contentRequestSuccess);
+            tjPlacement._handler(TapJoyContentState.contentRequestSuccess,placementName,error);
           } else {
             //TODO : Handler Null Error
           }
         }
         break;
       case 'requestFail':
-        String placementName = call.arguments["placementName"];
-        TJPlacement tjPlacement = placements.firstWhere((element) => element.name == placementName,orElse: ()=> null);
-
         if (tjPlacement != null) {
           if (tjPlacement._handler != null) {
-            tjPlacement._handler(TapJoyContentState.contentRequestFail);
+            tjPlacement._handler(TapJoyContentState.contentRequestFail,placementName,error);
           } else {
             //TODO : Handler Null Error
           }
         }
         break;
       case 'contentReady':
-        print("7ooodaa contentReady");
-        String placementName = call.arguments["placementName"];
-        TJPlacement tjPlacement = placements.firstWhere((element) => element.name == placementName,orElse: ()=> null);
-
         if (tjPlacement != null) {
           if (tjPlacement._handler != null) {
-            tjPlacement._handler(TapJoyContentState.contentReady);
+            tjPlacement._handler(TapJoyContentState.contentReady,placementName,error);
           } else {
             //TODO : Handler Null Error
           }
         }
         break;
       case 'contentDidAppear':
-        String placementName = call.arguments["placementName"];
-        TJPlacement tjPlacement = placements.firstWhere((element) => element.name == placementName,orElse: ()=> null);
-
         if (tjPlacement != null) {
           if (tjPlacement._handler != null) {
-            tjPlacement._handler(TapJoyContentState.contentDidAppear);
+            tjPlacement._handler(TapJoyContentState.contentDidAppear,placementName,error);
           } else {
             //TODO : Handler Null Error
           }
         }
         break;
       case 'clicked':
-        String placementName = call.arguments["placementName"];
-        TJPlacement tjPlacement = placements.firstWhere((element) => element.name == placementName,orElse: ()=> null);
-
         if (tjPlacement != null) {
           if (tjPlacement._handler != null) {
-            tjPlacement._handler(TapJoyContentState.userClicked);
+            tjPlacement._handler(TapJoyContentState.userClicked,placementName,error);
           } else {
             //TODO : Handler Null Error
           }
         }
         break;
       case 'contentDidDisAppear':
-        String placementName = call.arguments["placementName"];
-        TJPlacement tjPlacement = placements.firstWhere((element) => element.name == placementName,orElse: ()=> null);
-
         if (tjPlacement != null) {
           if (tjPlacement._handler != null) {
-            tjPlacement._handler(TapJoyContentState.contentDidDisappear);
+            tjPlacement._handler(TapJoyContentState.contentDidDisappear,placementName,error);
           } else {
             //TODO : Handler Null Error
           }
@@ -163,33 +171,23 @@ EarnedCurrencyAlertHandler _earnedCurrencyAlertHandler;
         break;
       case 'onGetCurrencyBalanceResponse':
         if (this._getCurrencyBalanceHandler != null) {
-          int balance = call.arguments["balance"] != null ?  int.parse(call.arguments["balance"]) : null;
-          String error = call.arguments["error"];
-          String currencyName = call.arguments["currencyName"];
+
           this._getCurrencyBalanceHandler(currencyName,balance,error);
         }
         break;
       case 'onSpendCurrencyResponse':
         if (this._spendCurrencyHandler != null) {
-          int balance = call.arguments["balance"] != null ?  int.parse(call.arguments["balance"]) : null;
-          String error = call.arguments["error"];
-          String currencyName = call.arguments["currencyName"];
+
          this._spendCurrencyHandler(currencyName,balance,error);
         }
         break;
       case 'onAwardCurrencyResponse':
         if (this._awardCurrencyHandler != null) {
-          int balance = call.arguments["balance"] != null ?  int.parse(call.arguments["balance"]) : null;
-          String error = call.arguments["error"];
-          String currencyName = call.arguments["currencyName"];
           this._awardCurrencyHandler(currencyName,balance,error);
         }
         break;
       case 'onEarnedCurrency':
         if (this._earnedCurrencyAlertHandler != null) {
-          int earnedAmount = call.arguments["earnedAmount"] != null ?  int.parse(call.arguments["earnedAmount"]) : null;
-          String error = call.arguments["error"];
-          String currencyName = call.arguments["currencyName"];
           this._earnedCurrencyAlertHandler(currencyName,earnedAmount,error);
         }
         break;

@@ -50,8 +50,6 @@ public class TapJoyPlugin implements FlutterPlugin, MethodCallHandler, ActivityA
 
   @Override
   public void onMethodCall(@NonNull MethodCall call, @NonNull final Result result) {
-
-
     switch (call.method) {
 
       case "connectTapJoy":
@@ -78,23 +76,18 @@ public class TapJoyPlugin implements FlutterPlugin, MethodCallHandler, ActivityA
           @Override
           public void onEarnedCurrency(String currencyName, int amount) {
             Hashtable<String, Object> getCurrencyResponse = new Hashtable<String, Object>();
-            try {
               getCurrencyResponse.put("currencyName",currencyName);
               getCurrencyResponse.put("earnedAmount",amount);
-              TapJoyPlugin.activity.runOnUiThread(new Runnable() {@Override
-              public void run() {
-
-                channel.invokeMethod("onEarnedCurrency",null);
-              }
-              });
-            } catch(final Exception e) {
-              Log.e("Tapjoy", "Error " + e.toString());
-            } }
+              invokeMethod("onEarnedCurrency",getCurrencyResponse);
+          }
         });
         break;
       case "setUserID":
         final String userID = call.argument("userID");
         Tapjoy.setUserID(userID);
+        break;
+      case "isConnected":
+        result.success(Tapjoy.isConnected());
         break;
       case "createPlacement":
         final String placementName = call.argument("placementName");
@@ -103,85 +96,36 @@ public class TapJoyPlugin implements FlutterPlugin, MethodCallHandler, ActivityA
           public void onRequestSuccess(final TJPlacement tjPlacement) {
             final Hashtable<String, Object> myMap = new Hashtable<String, Object>();
             myMap.put("placementName",tjPlacement.getName());
-            try {
-              TapJoyPlugin.activity.runOnUiThread(new Runnable() {@Override
-              public void run() {
-
-
-                channel.invokeMethod("requestSuccess",myMap);
-              }
-              });
-            } catch(final Exception e) {
-              Log.e("Tapjoy", "Error " + e.toString());
-            }
+             invokeMethod("requestSuccess",myMap);
           }
 
           @Override
           public void onRequestFailure(TJPlacement tjPlacement, TJError tjError) {
             final Hashtable<String, Object> myMap = new Hashtable<String, Object>();
             myMap.put("placementName",tjPlacement.getName());
-            try {
-              TapJoyPlugin.activity.runOnUiThread(new Runnable() {@Override
-              public void run() {
-
-                channel.invokeMethod("requestFail",myMap);
-              }
-              });
-            } catch(final Exception e) {
-              Log.e("Tapjoy", "Error " + e.toString());
-            }
-
+            myMap.put("error",tjError.message);
+              invokeMethod("requestFail",myMap);
           }
 
           @Override
           public void onContentReady(TJPlacement tjPlacement) {
             final Hashtable<String, Object> myMap = new Hashtable<String, Object>();
             myMap.put("placementName",tjPlacement.getName());
-            try {
-              TapJoyPlugin.activity.runOnUiThread(new Runnable() {@Override
-              public void run() {
-
-
-                channel.invokeMethod("contentReady",myMap);
-              }
-              });
-            } catch(final Exception e) {
-              Log.e("Tapjoy", "Error " + e.toString());
-            }
-
+              invokeMethod("contentReady",myMap);
           }
 
           @Override
           public void onContentShow(TJPlacement tjPlacement) {
             final Hashtable<String, Object> myMap = new Hashtable<String, Object>();
             myMap.put("placementName",tjPlacement.getName());
-            try {
-              TapJoyPlugin.activity.runOnUiThread(new Runnable() {@Override
-              public void run() {
-                channel.invokeMethod("contentDidAppear",myMap);
-              }
-              });
-            } catch(final Exception e) {
-              Log.e("Tapjoy", "Error " + e.toString());
-            }
-
+            invokeMethod("contentDidAppear",myMap);
           }
 
           @Override
           public void onContentDismiss(TJPlacement tjPlacement) {
             final Hashtable<String, Object> myMap = new Hashtable<String, Object>();
             myMap.put("placementName",tjPlacement.getName());
-            try {
-              TapJoyPlugin.activity.runOnUiThread(new Runnable() {@Override
-              public void run() {
-
-
-                channel.invokeMethod("contentDidDisAppear",myMap);
-              }
-              });
-            } catch(final Exception e) {
-              Log.e("Tapjoy", "Error " + e.toString());
-            }
+           invokeMethod("contentDidDisAppear",myMap);
 
           }
 
@@ -199,17 +143,7 @@ public class TapJoyPlugin implements FlutterPlugin, MethodCallHandler, ActivityA
           public void onClick(TJPlacement tjPlacement) {
             final Hashtable<String, Object> myMap = new Hashtable<String, Object>();
             myMap.put("placementName",tjPlacement.getName());
-            try {
-              TapJoyPlugin.activity.runOnUiThread(new Runnable() {@Override
-              public void run() {
-
-
-                channel.invokeMethod("clicked",myMap);
-              }
-              });
-            } catch(final Exception e) {
-              Log.e("Tapjoy", "Error " + e.toString());
-            }
+           invokeMethod("clicked",myMap);
           }
         };
         TJPlacement p = Tapjoy.getPlacement(placementName, placementListener);
@@ -219,155 +153,73 @@ public class TapJoyPlugin implements FlutterPlugin, MethodCallHandler, ActivityA
       case "requestContent":
         final String placementNameRequest = call.argument("placementName");
         final TJPlacement tjPlacementRequest = placements.get(placementNameRequest);
-
         if (tjPlacementRequest != null) {
           tjPlacementRequest.requestContent();
-
         } else {
-          result.success(String.format("Placement with name %s NOT Found, please add placement first", placementNameRequest));
+          final Hashtable<String, Object> myMap = new Hashtable<String, Object>();
+          myMap.put("placementName",placementNameRequest);
+          myMap.put("error","Placement Not Found, Please Add placement first");
+          invokeMethod("requestFail",myMap);
         }
-
         break;
       case "showPlacement":
         final String placementNameShow = call.argument("placementName");
         final TJPlacement tjPlacementShow = placements.get(placementNameShow);
-        if (tjPlacementShow!= null) {
-          if (tjPlacementShow.isContentAvailable()) {
-            if (tjPlacementShow.isContentReady()) {
-              tjPlacementShow.showContent();
-            } else {
-              result.success(String.format("Placement with name %s Content NOT Ready", placementNameShow));
-
-            }
-          } else {
-            result.success(String.format("Placement with name %s NO content available", placementNameShow));
-
-          }
-
-        } else {
-          result.success(String.format("Placement with name %s NOT Found, please add placement first", placementNameShow));
-        }
+        assert tjPlacementShow != null;
+        tjPlacementShow.showContent();
         break;
       case "getCurrencyBalance":
         Tapjoy.getCurrencyBalance(new TJGetCurrencyBalanceListener(){
           Hashtable<String, Object> getCurrencyResponse = new Hashtable<String, Object>();
           @Override
           public void onGetCurrencyBalanceResponse(String currencyName, int balance) {
-            try {
-              getCurrencyResponse.put("currencyName",currencyName);
-              getCurrencyResponse.put("balance",balance);
-              TapJoyPlugin.activity.runOnUiThread(new Runnable() {@Override
-              public void run() {
-
-                channel.invokeMethod("onGetCurrencyBalanceResponse",getCurrencyResponse);
-
-              }
-              });
-            } catch(final Exception e) {
-              Log.e("Tapjoy", "Error " + e.toString());
-            }
+            getCurrencyResponse.put("currencyName",currencyName);
+            getCurrencyResponse.put("balance",balance);
+            invokeMethod("onGetCurrencyBalanceResponse",getCurrencyResponse);
           }
           @Override
           public void onGetCurrencyBalanceResponseFailure(String error) {
-            try {
               getCurrencyResponse.put("error",error);
-
-              TapJoyPlugin.activity.runOnUiThread(new Runnable() {@Override
-              public void run() {
-
-                channel.invokeMethod("onGetCurrencyBalanceResponse",getCurrencyResponse);
-
-              }
-              });
-            } catch(final Exception e) {
-              Log.e("Tapjoy", "Error " + e.toString());
+              invokeMethod("onGetCurrencyBalanceResponse",getCurrencyResponse);
             }
-          }
         });
 
         break;
       case "spendCurrency":
-        final String amountToSpend = call.argument("amount");
-        final int myAmountInt = Integer.parseInt(amountToSpend);
+        final int myAmountInt = call.argument("amount");
         Tapjoy.spendCurrency(myAmountInt, new TJSpendCurrencyListener() {
           Hashtable<String, Object> spendCurrencyResponse = new Hashtable<String, Object>();
           @Override
           public void onSpendCurrencyResponse(String currencyName, int balance) {
-            try {
-              spendCurrencyResponse.put("currencyName",currencyName);
-              spendCurrencyResponse.put("balance",balance);
-
-              TapJoyPlugin.activity.runOnUiThread(new Runnable() {@Override
-              public void run() {
-
-                channel.invokeMethod("onSpendCurrencyResponse",spendCurrencyResponse);
-
-              }
-              });
-            } catch(final Exception e) {
-              Log.e("Tapjoy", "Error " + e.toString());
-            }
-
+            spendCurrencyResponse.put("currencyName",currencyName);
+            spendCurrencyResponse.put("balance",balance);
+            invokeMethod("onSpendCurrencyResponse",spendCurrencyResponse);
           }
 
           @Override
           public void onSpendCurrencyResponseFailure(String error) {
-            try {
-              spendCurrencyResponse.put("error",error);
-
-
-              TapJoyPlugin.activity.runOnUiThread(new Runnable() {@Override
-              public void run() {
-
-                channel.invokeMethod("onSpendCurrencyBalanceResponse",spendCurrencyResponse);
-
-              }
-              });
-            } catch(final Exception e) {
-              Log.e("Tapjoy", "Error " + e.toString());
-            }
+            spendCurrencyResponse.put("error",error);
+            invokeMethod("onSpendCurrencyResponse",spendCurrencyResponse);
           }
         });
 
         break;
 
       case "awardCurrency":
-        final String amountToAward = call.argument("amount");
-        final int myAmountIntAward = Integer.parseInt(amountToAward);
+        final int myAmountIntAward = call.argument("amount");
         Tapjoy.awardCurrency(myAmountIntAward, new TJAwardCurrencyListener() {
           Hashtable<String, Object> awardCurrencyResponse = new Hashtable<String, Object>();
           @Override
           public void onAwardCurrencyResponse(String currencyName, int balance) {
-            try {
-              awardCurrencyResponse.put("currencyName",currencyName);
-              awardCurrencyResponse.put("balance",balance);
-              TapJoyPlugin.activity.runOnUiThread(new Runnable() {@Override
-              public void run() {
-
-                channel.invokeMethod("onAwardCurrencyResponse",awardCurrencyResponse);
-
-              }
-              });
-            } catch(final Exception e) {
-              Log.e("Tapjoy", "Error " + e.toString());
-            }
+            awardCurrencyResponse.put("currencyName",currencyName);
+            awardCurrencyResponse.put("balance",balance);
+            invokeMethod("onAwardCurrencyResponse",awardCurrencyResponse);
           }
 
           @Override
           public void onAwardCurrencyResponseFailure(String error) {
-            try {
-              awardCurrencyResponse.put("error",error);
-              TapJoyPlugin.activity.runOnUiThread(new Runnable() {@Override
-              public void run() {
-
-                channel.invokeMethod("onAwardCurrencyResponse",awardCurrencyResponse);
-
-              }
-              });
-            } catch(final Exception e) {
-              Log.e("Tapjoy", "Error " + e.toString());
-            }
-
+            awardCurrencyResponse.put("error",error);
+            invokeMethod("onAwardCurrencyResponse",awardCurrencyResponse);
           }
         });
 
@@ -402,5 +254,17 @@ public class TapJoyPlugin implements FlutterPlugin, MethodCallHandler, ActivityA
   @Override
   public void onDetachedFromActivity() {
 
+  }
+
+  void invokeMethod(@NonNull final String methodName,final Hashtable<String,Object> data) {
+    try {
+      TapJoyPlugin.activity.runOnUiThread(new Runnable() {@Override
+      public void run() {
+        channel.invokeMethod(methodName,data);
+      }
+      });
+    } catch(final Exception e) {
+      Log.e("TapJoyPlugin", "Error " + e.toString());
+    }
   }
 }
