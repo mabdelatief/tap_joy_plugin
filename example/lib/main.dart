@@ -24,10 +24,8 @@ class _MyAppState extends State<MyApp> {
     TapJoyPlugin.shared.setConnectionResultHandler(_connectionResultHandler());
     // connect to TapJoy, all fields are required.
     TapJoyPlugin.shared.connect(
-        androidApiKey:
-            "IBuJzgu8TbGfEB2aC--ZGgECiwfJjSSMq7XrzTz2Uri3tzWUi0mmUTiwY8nT",
-        iOSApiKey:
-            "U6HG8d8zSOC-0gZYNNdMRwEBCKsMrykrl36QNJ1fTt3gFcDi3MmGneB3W4sZ",
+        androidApiKey: "tap_joy_android_api_key",
+        iOSApiKey: "tap_joy_ios_api_key",
         debug: true);
     // set userID
     TapJoyPlugin.shared.setUserID(userID: "user_id123");
