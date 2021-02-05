@@ -1,6 +1,6 @@
 name: tap_joy_plugin
 description: Flutter Plugin for TapJoy SDK, does NOT support TapJoy Purchases or TapJoy Push Notifications.
-version: 0.0.1
+version: 0.0.2
 homepage: https://github.com/mabdelatief/tap_joy_plugin
 
 environment:
