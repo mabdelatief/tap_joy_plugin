@@ -46,7 +46,7 @@ class _MyAppState extends State<MyApp> {
 
 // currency handler
   TJSpendCurrencyHandler _currencyHandler() {
-    TJSpendCurrencyHandler handler =  (currencyName, amount, error) {
+    TJSpendCurrencyHandler handler = (currencyName, amount, error) {
       setState(() {
         balance = "Currency Name: " +
             currencyName.toString() +
@@ -59,19 +59,18 @@ class _MyAppState extends State<MyApp> {
     return handler;
   }
 
-
   // connection result handler
   TJConnectionResultHandler _connectionResultHandler() {
-    TJConnectionResultHandler handler =  (result) {
+    TJConnectionResultHandler handler = (result) {
       switch (result) {
         case TJConnectionResult.connected:
-        // TODO: Handle this case.
+          // TODO: Handle this case.
           setState(() {
             connectionState = "Connected";
           });
           break;
         case TJConnectionResult.disconnected:
-        // TODO: Handle this case.
+          // TODO: Handle this case.
           setState(() {
             connectionState = "Disconnected";
           });
@@ -83,7 +82,7 @@ class _MyAppState extends State<MyApp> {
 
   // placement Handler
   TJPlacementHandler _placementHandler() {
-    TJPlacementHandler handler =  (contentState, name, error) {
+    TJPlacementHandler handler = (contentState, name, error) {
       switch (contentState) {
         case TJContentState.contentReady:
           setState(() {
@@ -108,7 +107,7 @@ class _MyAppState extends State<MyApp> {
         case TJContentState.contentRequestFail:
           setState(() {
             contentStateText =
-            "Content Request Fail + $error for placement :  $name";
+                "Content Request Fail + $error for placement :  $name";
           });
           break;
         case TJContentState.userClickedAndroidOnly:
@@ -118,8 +117,9 @@ class _MyAppState extends State<MyApp> {
           break;
       }
     };
-       return handler;
+    return handler;
   }
+
   // get App Tracking Authentication . iOS ONLY
   Future<String> getAuth() async {
     TapJoyPlugin.shared.getIOSATTAuth().then((value) {
@@ -160,7 +160,6 @@ class _MyAppState extends State<MyApp> {
           });
       }
     });
-
   }
 
   @override

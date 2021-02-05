@@ -4,10 +4,10 @@ import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 
-// connection result enums for ConnectionResultHandler
+/// connection result enums for ConnectionResultHandler
 enum TJConnectionResult { connected, disconnected }
 
-// Placement Content State enums for TJPlacementHandler
+/// Placement Content State enums for TJPlacementHandler
 enum TJContentState {
   contentReady,
   contentDidAppear,
@@ -16,7 +16,8 @@ enum TJContentState {
   contentRequestFail,
   userClickedAndroidOnly,
 }
-// iOS App Tracking Authentication Result enums for getIOSATTAuth
+
+/// iOS App Tracking Authentication Result enums for getIOSATTAuth
 enum IOSATTAuthResult {
   notDetermined,
   restricted,
@@ -27,84 +28,94 @@ enum IOSATTAuthResult {
   android
 }
 
-// TJPlacementHandler
-// contentState with Type TapJoyContentState enum
+/// TJPlacementHandler
+/// contentState with Type TapJoyContentState enum
 typedef void TJPlacementHandler(
   TJContentState contentState,
   String placementName,
   String error,
 );
-// ConnectionResultHandler returns connectionResult with Type TapJoyConnectionResult enum
+
+/// ConnectionResultHandler returns connectionResult with Type TapJoyConnectionResult enum
 typedef void TJConnectionResultHandler(TJConnectionResult connectionResult);
-// SpendCurrencyHandler returns String currencyName, int amount, String error
-// if function is successful , error is null
-// if function fails, currencyName & amount are null
+
+/// SpendCurrencyHandler returns String currencyName, int amount, String error
+/// if function is successful , error is null
+/// if function fails, currencyName & amount are null
 typedef void TJSpendCurrencyHandler(
     String currencyName, int amount, String error);
-// AwardCurrencyHandler returns String currencyName, int amount, String error
-// if function is successful , error is null
-// if function fails, currencyName & amount are null
+
+/// AwardCurrencyHandler returns String currencyName, int amount, String error
+/// if function is successful , error is null
+/// if function fails, currencyName & amount are null
 typedef void TJAwardCurrencyHandler(
     String currencyName, int amount, String error);
-// GetCurrencyBalanceHandler returns String currencyName, int amount, String error
-// if function is successful , error is null
-// if function fails, currencyName & amount are null
+
+/// GetCurrencyBalanceHandler returns String currencyName, int amount, String error
+/// if function is successful , error is null
+/// if function fails, currencyName & amount are null
 typedef void TJGetCurrencyBalanceHandler(
     String currencyName, int amount, String error);
-// EarnedCurrencyAlertHandler returns String currencyName, int amount, String error
-// In order to notify users that they’ve earned virtual currency since the last time the app queried the user’s currency balance,
-// if function is successful , error is null
-// if function fails, currencyName & amount are null
+
+/// EarnedCurrencyAlertHandler returns String currencyName, int amount, String error
+/// In order to notify users that they’ve earned virtual currency since the last time the app queried the user’s currency balance,
+/// if function is successful , error is null
+/// if function fails, currencyName & amount are null
 typedef void TJEarnedCurrencyAlertHandler(
     String currencyName, int earnedAmount, String error);
 
-
 const MethodChannel _channel = const MethodChannel('tap_joy_plugin');
-
 
 class TapJoyPlugin {
   static TapJoyPlugin shared = new TapJoyPlugin();
-  // Array of placements that you added.
+
+  /// Array of placements that you added.
   final List<TJPlacement> placements = [];
 
-  // Add placement
+  /// Add placement
   Future<bool> addPlacement(TJPlacement tjPlacement) async {
     placements.add(tjPlacement);
     return await _createPlacement(tjPlacement);
   }
 
-  // event handlers
+  /// event handlers
   TJConnectionResultHandler _connectionResultHandler;
   TJSpendCurrencyHandler _spendCurrencyHandler;
   TJAwardCurrencyHandler _awardCurrencyHandler;
   TJGetCurrencyBalanceHandler _getCurrencyBalanceHandler;
   TJEarnedCurrencyAlertHandler _earnedCurrencyAlertHandler;
 
-  // Set connection result handler which returns TapJoyConnectionResult
+  /// Set connection result handler which returns TapJoyConnectionResult
   void setConnectionResultHandler(TJConnectionResultHandler handler) {
     _connectionResultHandler = handler;
   }
- // set Spend currency handler which returns String currencyName, int amount, String error
+
+  /// set Spend currency handler which returns String currencyName, int amount, String error
   void setSpendCurrencyHandler(TJSpendCurrencyHandler handler) {
     _spendCurrencyHandler = handler;
   }
-  // set Award currency handler which returns String currencyName, int amount, String error
+
+  /// set Award currency handler which returns String currencyName, int amount, String error
   void setAwardCurrencyHandler(TJAwardCurrencyHandler handler) {
     _awardCurrencyHandler = handler;
   }
-  // set Get currency Balance handler which returns String currencyName, int amount, String error
+
+  /// set Get currency Balance handler which returns String currencyName, int amount, String error
   void setGetCurrencyBalanceHandler(TJGetCurrencyBalanceHandler handler) {
     _getCurrencyBalanceHandler = handler;
   }
-  // set Earned currency Alert handler which returns String currencyName, int amount, String error
+
+  /// set Earned currency Alert handler which returns String currencyName, int amount, String error
   void setEarnedCurrencyAlertHandler(TJEarnedCurrencyAlertHandler handler) {
     _earnedCurrencyAlertHandler = handler;
   }
-// check if connected to TapJoy, returns Bool
+
+  /// check if connected to TapJoy, returns Bool
   Future<bool> isConnected() async {
     return await _channel.invokeMethod("isConnected");
   }
-// get iOS App Tracking Authentication status, returns IOSATTAuthResult enum
+
+  /// get iOS App Tracking Authentication status, returns IOSATTAuthResult enum
   Future<IOSATTAuthResult> getIOSATTAuth() async {
     if (Platform.isIOS) {
       final String result = await _channel.invokeMethod("getATT");
@@ -133,12 +144,12 @@ class TapJoyPlugin {
     }
   }
 
-  // constructor method
+  /// constructor method
   TapJoyPlugin() {
     _channel.setMethodCallHandler(_handleMethod);
   }
 
-  // connect to TapJoy, all fields required.
+  /// connect to TapJoy, all fields required.
   Future<bool> connect(
       {@required String androidApiKey,
       @required String iOSApiKey,
@@ -151,7 +162,8 @@ class TapJoyPlugin {
     });
     return connectionResult;
   }
- // set user ID
+
+  /// set user ID
   Future<void> setUserID({@required String userID}) async {
     await _channel.invokeMethod('setUserID', <String, dynamic>{
       'userID': userID,
@@ -189,9 +201,7 @@ class TapJoyPlugin {
           if (tjPlacement._handler != null) {
             tjPlacement._handler(
                 TJContentState.contentRequestSuccess, placementName, null);
-          } else {
-            //TODO : Handler Null Error
-          }
+          } else {}
         }
         break;
       case 'requestFail':
@@ -204,9 +214,7 @@ class TapJoyPlugin {
           if (tjPlacement._handler != null) {
             tjPlacement._handler(
                 TJContentState.contentRequestFail, placementName, error);
-          } else {
-            //TODO : Handler Null Error
-          }
+          } else {}
         }
         break;
       case 'contentReady':
@@ -219,9 +227,7 @@ class TapJoyPlugin {
           if (tjPlacement._handler != null) {
             tjPlacement._handler(
                 TJContentState.contentReady, placementName, null);
-          } else {
-            //TODO : Handler Null Error
-          }
+          } else {}
         }
         break;
       case 'contentDidAppear':
@@ -234,9 +240,7 @@ class TapJoyPlugin {
           if (tjPlacement._handler != null) {
             tjPlacement._handler(
                 TJContentState.contentDidAppear, placementName, null);
-          } else {
-            //TODO : Handler Null Error
-          }
+          } else {}
         }
         break;
       case 'clicked':
@@ -249,9 +253,7 @@ class TapJoyPlugin {
           if (tjPlacement._handler != null) {
             tjPlacement._handler(
                 TJContentState.userClickedAndroidOnly, placementName, null);
-          } else {
-            //TODO : Handler Null Error
-          }
+          } else {}
         }
         break;
       case 'contentDidDisAppear':
@@ -264,9 +266,7 @@ class TapJoyPlugin {
           if (tjPlacement._handler != null) {
             tjPlacement._handler(
                 TJContentState.contentDidDisappear, placementName, null);
-          } else {
-            //TODO : Handler Null Error
-          }
+          } else {}
         }
         break;
       case 'onGetCurrencyBalanceResponse':
@@ -306,17 +306,20 @@ class TapJoyPlugin {
     }
     return null;
   }
-  // get currency balance, does NOT return, set setGetCurrencyBalanceHandler to get notified with result
+
+  /// get currency balance, does NOT return, set setGetCurrencyBalanceHandler to get notified with result
   Future<void> getCurrencyBalance() async {
     await _channel.invokeMethod('getCurrencyBalance');
   }
-  // spend currency balance, does NOT return, set setSpendCurrencyHandler to get notified with result
+
+  /// spend currency balance, does NOT return, set setSpendCurrencyHandler to get notified with result
   Future<void> spendCurrency(int amount) async {
     await _channel.invokeMethod('spendCurrency', <String, dynamic>{
       'amount': amount,
     });
   }
-  // award currency balance, does NOT return, set setAwardCurrencyHandler to get notified with result
+
+  /// award currency balance, does NOT return, set setAwardCurrencyHandler to get notified with result
   Future<void> awardCurrency(int amount) async {
     await _channel.invokeMethod('awardCurrency', <String, dynamic>{
       'amount': amount,
@@ -325,28 +328,28 @@ class TapJoyPlugin {
 }
 
 class TJPlacement {
-  // placement name, Required
+  /// placement name, Required
   final String name;
   TJPlacementHandler _handler;
 
-  // set handler for placement to get notified for events with enum TapJoyContentState
+  /// set handler for placement to get notified for events with enum TapJoyContentState
   void setHandler(TJPlacementHandler myHandler) {
     _handler = myHandler;
   }
 
-  //constructor method, placement name is required
+  ///constructor method, placement name is required
   TJPlacement({@required this.name}) {
-    // TapJoyPlugin.shared.addPlacement(this);
+//
   }
 
-  // request content for placement, does NOT return, set placement handler with placement.setHandler to get notified for contentState
+  /// request content for placement, does NOT return, set placement handler with placement.setHandler to get notified for contentState
   Future<void> requestContent() async {
     await _channel.invokeMethod('requestContent', <String, dynamic>{
       'placementName': name,
     });
   }
 
-  // show content for placement, does NOT return, set placement handler with placement.setHandler to get notified for contentState
+  /// show content for placement, does NOT return, set placement handler with placement.setHandler to get notified for contentState
   Future<void> showPlacement() async {
     await _channel.invokeMethod('showPlacement', <String, dynamic>{
       'placementName': name,
