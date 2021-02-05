@@ -12,6 +12,7 @@ dependencies:
   flutter:
     sdk: flutter
 
+
   tap_joy_plugin:
     # When depending on this package from a real application you should use:
     #   tap_joy_plugin: ^x.y.z

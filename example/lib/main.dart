@@ -41,6 +41,7 @@ class _MyAppState extends State<MyApp> {
     TapJoyPlugin.shared.setGetCurrencyBalanceHandler(_currencyHandler());
     TapJoyPlugin.shared.setAwardCurrencyHandler(_currencyHandler());
     TapJoyPlugin.shared.setSpendCurrencyHandler(_currencyHandler());
+    TapJoyPlugin.shared.setEarnedCurrencyAlertHandler(_currencyHandler());
   }
 
 // currency handler
@@ -159,6 +160,7 @@ class _MyAppState extends State<MyApp> {
           });
       }
     });
+
   }
 
   @override

@@ -87,10 +87,10 @@ iOSApiKey:"your-tapjoy-iOS-key",debug: true);
 ```dart
     TapJoyPlugin.shared.setConnectionResultHandler((result) {
       switch (result) {
-        case TapJoyConnectionResult.connected:
+        case TJConnectionResult.connected:
           // TODO: Handle this case.
           break;
-        case TapJoyConnectionResult.disconnected:
+        case TJConnectionResult.disconnected:
           // TODO: Handle this case.
           break;
       }
@@ -145,22 +145,22 @@ iOSApiKey:"your-tapjoy-iOS-key",debug: true);
 ```dart
 TJPlacementHandler handler = (contentState,name,error) {
       switch(contentState) {
-        case TapJoyContentState.contentReady:
+        case TJContentState.contentReady:
         // TODO: Handle this case.
           break;
-        case TapJoyContentState.contentDidAppear:
+        case TJContentState.contentDidAppear:
         // TODO: Handle this case.
           break;
-        case TapJoyContentState.contentDidDisappear:
+        case TJContentState.contentDidDisappear:
         // TODO: Handle this case.
           break;
-        case TapJoyContentState.contentRequestSuccess:
+        case TJContentState.contentRequestSuccess:
         // TODO: Handle this case.
           break;
-        case TapJoyContentState.contentRequestFail:
+        case TJContentState.contentRequestFail:
         // TODO: Handle this case.
           break;
-        case TapJoyContentState.userClickedAndroidOnly:
+        case TJContentState.userClickedAndroidOnly:
         // TODO: Handle this case.
           break;
       }
