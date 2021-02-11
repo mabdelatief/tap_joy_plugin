@@ -1,6 +1,6 @@
 PODS:
   - Flutter (1.0.0)
-  - tap_joy_plugin (0.0.1):
+  - tap_joy_plugin (0.0.5):
     - Flutter
     - TapjoySDK
   - TapjoySDK (12.7.1)
@@ -21,9 +21,9 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   Flutter: 434fef37c0980e73bb6479ef766c45957d4b510c
-  tap_joy_plugin: f05d26883cabbc01249feabc33c65aa0a81166ef
+  tap_joy_plugin: 2aa26ce8512964ff5c402b06d0a30af76ae20208
   TapjoySDK: 27e4116ba377dcbe064743ca3ec3a8d70ccee2bb
 
-PODFILE CHECKSUM: 8e679eca47255a8ca8067c4c67aab20e64cb974d
+PODFILE CHECKSUM: 02d221f1e7d9462bff20092f7b45d080159f4852
 
 COCOAPODS: 1.10.0
