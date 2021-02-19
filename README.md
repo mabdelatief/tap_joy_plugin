@@ -2,7 +2,6 @@
 
 Flutter Plugin for [TapJoy](https://www.tapjoy.com/) SDK - Supports Android & iOS
 This Plugin Does NOT Support TapJoy purchases or Push Notifications yet.
-[BSD](https://github.com/mabdelatief/tap_joy_plugin/blob/master/LICENSE)
 
 [Medium Article on how to implement the plugin](https://mahmoudabdellatief-88944.medium.com/how-to-implement-tapjoy-in-flutter-180db663ea6
 )
@@ -45,6 +44,15 @@ add the following lines to ```info.plist``` file.
 <key>NSUserTrackingUsageDescription</key>
 <string>This allows us to deliver personalized ads for you.</string>
 ```
+## Podfile changes
+Comment out the following line in your iOS ```Podfile```
+
+```bash
+target 'Runner' do
+# use_frameworks!
+  use_modular_headers!
+```
+
 ## AndroidManifest changes
 
 The following permissions are needed:

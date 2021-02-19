@@ -18,7 +18,6 @@ Flutter Plugin for TapJoy SDK
   s.dependency 'Flutter'
   s.dependency 'TapjoySDK'
   s.platform = :ios, '9.0'
-  s.static_framework = true
 
 
   # Flutter.framework does not contain a i386 slice.
