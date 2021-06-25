@@ -1,3 +1,6 @@
+## 0.0.8
+
+* Null Safety.
 ## 0.0.6
 
 * Added Documentation for iOS Pod Install issue.
